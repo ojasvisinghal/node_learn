@@ -30,22 +30,22 @@ module.exports = function (app){
 //get  requests
 
     app.get('/', function (req, res) {
-        res.render('index.ejs');
-    });
-
-    app.get('/login', function (req, res) {
-        session = req.session;
-        if(session.uniqueId){
-            res.redirect('/redirects');
+        if (req.session.uniqueId) {
+            res.render('upload.ejs');
+            //res.send('your profile is here!! <a href="/logout"> LOGOUT </a>');
+        } else {
+            res.redirect('/login');
         }
 
-        res.render('login.ejs');
     });
-
-    app.get('/signup', function (req, res) {
-        res.render('signup.ejs');
+    app.get('/login', function (req, res) {
+        if(req.session.uniqueId){
+            res.redirect('/');
+        }else{
+            res.render('login.ejs');
+        }
     });
-
+  /*
     app.get('/redirects', function (req, res) {
         session = req.session;
         if(session.uniqueId){
@@ -54,19 +54,32 @@ module.exports = function (app){
             res.write('Invalid email id or password <a href="/logout"> GO BACK </a>');
         }
     });
+*/
+    app.get('/signup', function (req, res) {
+      if(req.session.uniqueId){
+        res.redirect('/');
+      }else{
+        res.render('signup.ejs');
+      }
+    });
+
 
     app.get('/upload', function (req, res) {
-        session = req.session;
-        if(session.uniqueId){
+        if(req.session.uniqueId){
             res.render('upload.ejs');
             //res.send('your profile is here!!!!!!!!!!!!  <a href="/logout"> LOGOUT </a>');
+        }else{
+          res.redirect('/login');
         }
     });
 
     app.get('/logout',function (req, res) {
-        req.session.destroy();
-        res.redirect('/');
-
+        req.session.destroy(function(err){
+          if(err){
+            console.log(err);
+          }
+            res.redirect('/');
+        });
     });
 
   //  app.get('/upload', common.imageForm);
@@ -76,10 +89,10 @@ module.exports = function (app){
         console.log('req.body');
         console.log(req.body);
         mysqlC.query('insert into login(email , password) values ("' + req.body.email + '", "' + req.body.password + '")');
-        res.write('You sent the Email "' + req.body.email+'".\n');
-        res.end();
+        res.send('you have successfully registered!!! <a href="/">PLEASE LOGIN TO CONTINUE </a>');
 
     });
+
 //fileupload
     app.post('/upload', function(req, res) {
         var sampleFile;
@@ -103,21 +116,22 @@ module.exports = function (app){
 //    app.post('/upload', common.uploadImage);
 
     app.post('/login', function (req, res) {
-        session = req.session;
-        if(session.uniqueId){
-            res.redirect('/redirects');
-        }
-
-        mysqlC.query('SELECT * from login where email = "'+req.body.email+'" ', function(err, rows, fields) {
+        mysqlC.query('SELECT * from login where email = "'+req.body.email+'" ',
+        function(err, rows, fields) {
             if (!err){
                 console.log('The solution is: ', rows);
                 if (req.body.password == rows[0].password){
-                    session.uniqueId = req.body.email;
+                    req.session.uniqueId = req.body.email;
+                    res.redirect('/');
                 }
-                res.redirect('/redirects');
+                else{
+                  res.send('invalid passord');
+                }
             }
-            else
+            else{
                 console.log('Error while performing Query.');
+                res.send('some error occured');
+              }
             });
 
     });
