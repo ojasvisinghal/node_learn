@@ -89,17 +89,17 @@ module.exports = function (app){
 
     app.post('/contact',function(req,res){
       //Setup Nodemailer transport, I chose gmail. Create an application-specific password to avoid problems.
-          smtpTrans = nodemailer.createTransport({
+      let smtpTrans = nodemailer.createTransport({
           service: 'Gmail',
           auth: {
-              user: "",  //insert comapny's mail
-              pass: ""  //insert password here
+              user: "ojasvisinghal41@gmail.com",  //insert comapny's mail
+              pass: "ubuntu123"  //insert password here
           }
       });
       //Mail options
-      mailOpts = {
+    let mailOpts = {
           from: req.body.name + ' &lt;' + req.body.email + '&gt;', //grab form data from the request body object
-          to: 'osinghal00@gmail.com',
+          to: 'osinghal00@gmail.com', //email where emails are handled
           subject: 'Website contact form',
           text: req.body.message
       };
